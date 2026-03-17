@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Force webpack to avoid Turbopack multi-byte path issues on Windows */
+  webpack: (config) => {
+    return config;
+  },
 };
 
 export default nextConfig;
