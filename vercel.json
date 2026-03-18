@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/link-check",
+      "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/freshness",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}
