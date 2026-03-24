@@ -43,8 +43,8 @@ export default function EditProductPage() {
       // Set allergen status
       const status: AllergenStatus = {};
       ALL_ALLERGENS.forEach(a => { status[a.code] = false; });
-      (product.allergens || []).forEach((a: { allergen_code: string; is_free: boolean }) => {
-        status[a.allergen_code] = a.is_free;
+      (product.allergens || []).forEach((a: { allergen_code: string }) => {
+        status[a.allergen_code] = true;
       });
       setAllergenStatus(status);
     } catch (err) {
@@ -209,11 +209,11 @@ export default function EditProductPage() {
 
           <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px' }}>
             <p style={{ fontWeight: 600, color: '#B45309', marginBottom: '4px' }}>⚠️ 重要: アレルギー情報のAI自動判定は行いません</p>
-            <p style={{ fontSize: '0.875rem', color: '#92400E' }}>以下の各品目について「含まれていない（不使用）」品目にチェックを入れてください。チェックした品目は「不使用」としてユーザーに表示されます。<strong>誤った情報は生命に関わります。正確にチェックしてください。</strong></p>
+            <p style={{ fontSize: '0.875rem', color: '#92400E' }}>以下の各品目について、この商品に「含まれている」品目にチェックを入れてください。チェックした品目は「含む」としてユーザーに表示されます。<strong>誤った情報は生命に関わります。正確にチェックしてください。</strong></p>
           </div>
 
           {/* Mandatory */}
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#DC2626', marginBottom: '12px' }}>🔴 特定原材料 8品目（表示義務）</h3>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#DC2626', marginBottom: '12px' }}>🔴 特定原材料 8品目（表示義務）― 含まれるものにチェック</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px', marginBottom: '24px' }}>
             {MANDATORY_ALLERGENS.map(a => (
               <button key={a.code} onClick={() => toggleAllergen(a.code)}
@@ -223,15 +223,15 @@ export default function EditProductPage() {
                 }}>
                 <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{a.code === 'egg' ? '🥚' : a.code === 'milk' ? '🥛' : a.code === 'wheat' ? '🌾' : a.code === 'buckwheat' ? '☕' : a.code === 'peanut' ? '🥜' : a.code === 'shrimp' ? '🦐' : a.code === 'crab' ? '🦀' : '🌰'}</div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{a.name}</div>
-                <div style={{ fontSize: '0.7rem', color: allergenStatus[a.code] ? '#059669' : '#9CA3AF', marginTop: '2px' }}>
-                  {allergenStatus[a.code] ? '✅ 不使用' : '未設定'}
+                <div style={{ fontSize: '0.7rem', color: allergenStatus[a.code] ? '#D97706' : '#9CA3AF', marginTop: '2px' }}>
+                  {allergenStatus[a.code] ? '⚠️ 含む' : '含まない'}
                 </div>
               </button>
             ))}
           </div>
 
           {/* Recommended */}
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#D97706', marginBottom: '12px' }}>🟡 特定原材料に準ずるもの 20品目（表示推奨）</h3>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#D97706', marginBottom: '12px' }}>🟡 特定原材料に準ずるもの 20品目（表示推奨）― 含まれるものにチェック</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
             {RECOMMENDED_ALLERGENS.map(a => {
               const emojiMap: Record<string, string> = { almond: '🌰', abalone: '🐚', squid: '🦑', salmon_roe: '🔴', orange: '🍊', cashew: '🥜', kiwi: '🥝', beef: '🥩', sesame: '🫘', salmon: '🐟', mackerel: '🐟', soybean: '🫘', chicken: '🍗', banana: '🍌', pork: '🥓', matsutake: '🍄', peach: '🍑', yam: '🍠', apple: '🍎', gelatin: '🫧' };
@@ -243,8 +243,8 @@ export default function EditProductPage() {
                   }}>
                   <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{emojiMap[a.code] || '🔶'}</div>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{a.name}</div>
-                  <div style={{ fontSize: '0.7rem', color: allergenStatus[a.code] ? '#059669' : '#9CA3AF', marginTop: '2px' }}>
-                    {allergenStatus[a.code] ? '✅ 不使用' : '未設定'}
+                  <div style={{ fontSize: '0.7rem', color: allergenStatus[a.code] ? '#D97706' : '#9CA3AF', marginTop: '2px' }}>
+                    {allergenStatus[a.code] ? '⚠️ 含む' : '含まない'}
                   </div>
                 </button>
               );

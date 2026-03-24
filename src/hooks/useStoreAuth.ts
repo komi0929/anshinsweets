@@ -1,11 +1,11 @@
 /**
  * Store Authentication Hook
- * Handles JWT token storage in localStorage and auth state
+ * Handles JWT token storage, email/password auth, and Google OAuth hash extraction
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 const AUTH_KEY = 'anshinsweets_store_token';
 const STORE_KEY = 'anshinsweets_store_data';
@@ -24,31 +24,46 @@ type AuthState = {
 };
 
 export function useStoreAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    token: null,
-    store: null,
-    isLoading: true,
-    isAuthenticated: false,
-  });
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    const defaultState: AuthState = { token: null, store: null, isLoading: false, isAuthenticated: false };
+    if (typeof window === 'undefined') return { ...defaultState, isLoading: true };
 
-  // Load auth state from localStorage
-  useEffect(() => {
+    // Check URL hash for Google OAuth token (redirect from /api/auth/callback)
+    if (window.location.hash) {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const hashToken = params.get('token');
+      const hashStore = params.get('store');
+
+      if (hashToken && hashStore) {
+        try {
+          const storeData = JSON.parse(decodeURIComponent(hashStore)) as StoreUser;
+          localStorage.setItem(AUTH_KEY, hashToken);
+          localStorage.setItem(STORE_KEY, JSON.stringify(storeData));
+          // Clean URL hash
+          window.history.replaceState(null, '', window.location.pathname);
+          return { token: hashToken, store: storeData, isLoading: false, isAuthenticated: true };
+        } catch {
+          // ignore parse errors
+        }
+      }
+    }
+
+    // Load from localStorage
     const token = localStorage.getItem(AUTH_KEY);
-    const storeData = localStorage.getItem(STORE_KEY);
-    
-    if (token && storeData) {
+    const storeDataStr = localStorage.getItem(STORE_KEY);
+
+    if (token && storeDataStr) {
       try {
-        const store = JSON.parse(storeData) as StoreUser;
-        setAuthState({ token, store, isLoading: false, isAuthenticated: true });
+        const store = JSON.parse(storeDataStr) as StoreUser;
+        return { token, store, isLoading: false, isAuthenticated: true };
       } catch {
         localStorage.removeItem(AUTH_KEY);
         localStorage.removeItem(STORE_KEY);
-        setAuthState({ token: null, store: null, isLoading: false, isAuthenticated: false });
       }
-    } else {
-      setAuthState({ token: null, store: null, isLoading: false, isAuthenticated: false });
     }
-  }, []);
+    return defaultState;
+  });
 
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -112,9 +127,7 @@ export function useStoreAuth() {
     setAuthState({ token: null, store: null, isLoading: false, isAuthenticated: false });
   }, []);
 
-  /**
-   * Make an authenticated API call
-   */
+  /** Make an authenticated API call */
   const authFetch = useCallback(async (url: string, options: RequestInit = {}): Promise<Response> => {
     const token = localStorage.getItem(AUTH_KEY);
     return fetch(url, {

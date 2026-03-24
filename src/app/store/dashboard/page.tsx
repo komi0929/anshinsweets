@@ -12,12 +12,22 @@ export default function StoreDashboardPage() {
 
   useEffect(() => {
     const load = async () => {
-      const data = await getStoreProducts('store-001');
+      const data = await getStoreProducts('00000001-0000-0000-0000-000000000001');
       setProducts(data);
       setLoading(false);
     };
     load();
   }, []);
+
+  const storeId = '00000001-0000-0000-0000-000000000001'; // Demo
+  const [copied, setCopied] = useState(false);
+  const handleCopyUrl = () => {
+    const url = `${window.location.origin}/shop/${storeId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const publishedCount = products.filter(p => p.is_published).length;
   const totalClicks = 142; // Demo data
@@ -70,6 +80,26 @@ export default function StoreDashboardPage() {
           </div>
         </div>
 
+        {/* Store Page Link */}
+        <div className="card animate-fadeInUp stagger-2" style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: 'var(--space-md) var(--space-lg)', marginBottom: 'var(--space-xl)',
+          background: 'linear-gradient(135deg, #EFF6FF, #F0FDF4)',
+        }}>
+          <div>
+            <p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 4 }}>🌐 お店のページ</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>ユーザーに公開されているページを確認・共有</p>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', flexShrink: 0 }}>
+            <Link href={`/shop/${storeId}`} className="btn btn-sm btn-primary" target="_blank">
+              👁️ ページを見る
+            </Link>
+            <button className="btn btn-sm btn-secondary" onClick={handleCopyUrl}>
+              {copied ? '✅ コピー済み' : '🔗 URLコピー'}
+            </button>
+          </div>
+        </div>
+
         {/* Notifications */}
         <div style={{
           background: 'var(--color-warning-bg)',
@@ -109,7 +139,7 @@ export default function StoreDashboardPage() {
           ) : (
             <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
               {products.map(product => {
-                const freeAllergens = product.allergens?.filter(a => a.is_free) || [];
+                const containedAllergens = product.allergens || [];
                 return (
                   <div key={product.id} className="card" style={{ display: 'flex', gap: 'var(--space-md)', padding: 'var(--space-md)', cursor: 'auto' }}>
                     {/* Thumbnail */}
@@ -139,15 +169,21 @@ export default function StoreDashboardPage() {
                         {product.ai_summary}
                       </p>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        {freeAllergens.slice(0, 4).map(a => (
-                          <span key={a.allergen_code} className="badge badge-safe" style={{ fontSize: '0.7rem' }}>
-                            {a.allergen_code}不使用
-                          </span>
-                        ))}
-                        {freeAllergens.length > 4 && (
-                          <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>
-                            +{freeAllergens.length - 4}
-                          </span>
+                        {containedAllergens.length > 0 ? (
+                          <>
+                            {containedAllergens.slice(0, 4).map(a => (
+                              <span key={a.allergen_code} className="badge badge-warning" style={{ fontSize: '0.7rem' }}>
+                                ⚠️ {a.allergen_code}含む
+                              </span>
+                            ))}
+                            {containedAllergens.length > 4 && (
+                              <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>
+                                +{containedAllergens.length - 4}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="badge badge-safe" style={{ fontSize: '0.7rem' }}>✅ アレルゲンフリー</span>
                         )}
                       </div>
                     </div>

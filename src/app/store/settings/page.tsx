@@ -10,6 +10,9 @@ export default function StoreSettingsPage() {
   const [address, setAddress] = useState('東京都渋谷区神宮前3-1-1');
   const [phone, setPhone] = useState('03-1234-5678');
   const [website, setWebsite] = useState('https://example.com/soleil');
+  const [businessHours, setBusinessHours] = useState('10:00〜19:00（火曜定休）');
+  const [priceRange, setPriceRange] = useState('￥400〜￥2,800');
+  const [features, setFeatures] = useState<string[]>(['kids_friendly', 'stroller_ok', 'eat_in', 'takeout', 'allergy_consultation']);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -37,7 +40,7 @@ export default function StoreSettingsPage() {
 
       <main className="container container-narrow" style={{ padding: 'var(--space-xl) var(--space-md)' }}>
         <h1 style={{ fontSize: '1.4rem', marginBottom: 'var(--space-sm)' }} className="animate-fadeIn">
-          🏪 店舗基本情報設定
+          🧁 店舗基本情報設定
         </h1>
         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-xl)' }} className="animate-fadeIn stagger-1">
           店舗の基本情報を編集できます。住所はGoogle Maps APIで入力補助されます。
@@ -146,12 +149,78 @@ export default function StoreSettingsPage() {
             fontSize: '0.85rem',
           }}>
             <span style={{ fontSize: '2.5rem', opacity: 0.5 }}>🗺️</span>
-            <span>Google Maps APIキー設定後に表示されます</span>
+            <span>住所を入力すると、お店のページに地図が自動表示されます</span>
+          </div>
+        </div>
+
+        {/* Business Info */}
+        <div className="form-section animate-fadeInUp stagger-4">
+          <h2 className="form-section-title">🕐 営業情報</h2>
+
+          <div className="input-group" style={{ marginBottom: 'var(--space-md)' }}>
+            <label className="input-label" htmlFor="settings-hours">営業時間</label>
+            <input
+              id="settings-hours"
+              className="input-field"
+              type="text"
+              placeholder="例: 10:00〜19:00（火曜定休）"
+              value={businessHours}
+              onChange={e => setBusinessHours(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group" style={{ marginBottom: 'var(--space-md)' }}>
+            <label className="input-label" htmlFor="settings-price">価格帯</label>
+            <input
+              id="settings-price"
+              className="input-field"
+              type="text"
+              placeholder="例: ¥400〜¥2,800"
+              value={priceRange}
+              onChange={e => setPriceRange(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Feature Badges - Simple Toggles */}
+        <div className="form-section animate-fadeInUp stagger-5">
+          <h2 className="form-section-title">✨ お店の特徴（タップで選択）</h2>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 'var(--space-md)' }}>
+            該当するものをタップするだけ。お客様のお店ページにバッジとして表示されます。
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {[
+              { code: 'kids_friendly', emoji: '👶', label: 'キッズ歓迎' },
+              { code: 'stroller_ok', emoji: '🍼', label: 'ベビーカーOK' },
+              { code: 'eat_in', emoji: '🪑', label: 'イートイン' },
+              { code: 'takeout', emoji: '🛍️', label: 'テイクアウト' },
+              { code: 'delivery', emoji: '🚚', label: '配送対応' },
+              { code: 'parking', emoji: '🅿️', label: '駐車場あり' },
+              { code: 'allergy_consultation', emoji: '💬', label: 'アレルギー相談OK' },
+              { code: 'gluten_free_dedicated', emoji: '🌾', label: 'グルテンフリー専門' },
+              { code: 'vegan_dedicated', emoji: '🌱', label: 'ヴィーガン専門' },
+            ].map(item => (
+              <button
+                key={item.code}
+                className={`allergen-chip ${features.includes(item.code) ? 'selected' : ''}`}
+                onClick={() => {
+                  setFeatures(prev =>
+                    prev.includes(item.code)
+                      ? prev.filter(f => f !== item.code)
+                      : [...prev, item.code]
+                  );
+                }}
+                style={{ padding: '6px 14px' }}
+              >
+                <span style={{ fontSize: '1rem' }}>{item.emoji}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Save */}
-        <div style={{ marginTop: 'var(--space-xl)', marginBottom: 'var(--space-3xl)' }}>
+        <div style={{ marginTop: 'var(--space-xl)', marginBottom: 'var(--space-lg)' }}>
           <button
             className="btn btn-primary btn-full btn-lg"
             onClick={handleSave}
@@ -160,6 +229,28 @@ export default function StoreSettingsPage() {
           >
             {saving ? '保存中...' : '💾 設定を保存'}
           </button>
+        </div>
+
+        {/* Preview Link */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: 'var(--space-3xl)',
+        }}>
+          <Link
+            href="/shop/00000001-0000-0000-0000-000000000001"
+            target="_blank"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: '0.9rem', color: 'var(--color-primary)',
+              textDecoration: 'underline', textUnderlineOffset: 3,
+              fontWeight: 600,
+            }}
+          >
+            👁️ お店のページをプレビューする →
+          </Link>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)' }}>
+            ユーザーに公開されるページの表示を確認できます
+          </p>
         </div>
 
         {saved && (

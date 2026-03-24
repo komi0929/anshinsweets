@@ -6,7 +6,7 @@ import { verifyToken, extractToken } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const excludeAllergens = searchParams.get('exclude')?.split(',').filter(Boolean) || [];
+    const myAllergens = searchParams.get('exclude')?.split(',').filter(Boolean) || [];
     const category = searchParams.get('category') || '';
 
     if (!supabase) {
@@ -30,15 +30,14 @@ export async function GET(request: NextRequest) {
     const { data: products, error } = await query;
     if (error) throw error;
 
-    // Client-side allergen filtering (complex join not possible in Supabase query)
+    // Filter: exclude products that contain any of the user's allergens
     let result = products || [];
-    if (excludeAllergens.length > 0) {
+    if (myAllergens.length > 0) {
       result = result.filter((product: Record<string, unknown>) => {
-        const allergens = (product.allergens || []) as Array<{ allergen_code: string; is_free: boolean }>;
-        return excludeAllergens.every(code => {
-          const a = allergens.find(al => al.allergen_code === code);
-          return a ? a.is_free : true;
-        });
+        const allergens = (product.allergens || []) as Array<{ allergen_code: string }>;
+        return !myAllergens.some(code =>
+          allergens.some(a => a.allergen_code === code)
+        );
       });
     }
 
@@ -91,13 +90,14 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // Insert allergen records
+    // Insert allergen records (only for allergens that are contained)
     if (allergens && typeof allergens === 'object') {
-      const allergenRecords = Object.entries(allergens).map(([code, isFree]) => ({
-        product_id: product.id,
-        allergen_code: code,
-        is_free: Boolean(isFree),
-      }));
+      const allergenRecords = Object.entries(allergens)
+        .filter(([, contains]) => Boolean(contains))
+        .map(([code]) => ({
+          product_id: product.id,
+          allergen_code: code,
+        }));
 
       if (allergenRecords.length > 0) {
         const { error: allergenError } = await supabase

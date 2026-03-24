@@ -17,6 +17,18 @@ export const PRODUCT_CATEGORIES = [
   { value: 'other', label: 'その他', icon: '🍬' },
 ] as const;
 
+/** 地方区分 */
+export const REGIONS = [
+  { value: 'hokkaido_tohoku', label: '北海道・東北', prefectures: ['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県'] },
+  { value: 'kanto', label: '関東', prefectures: ['東京都','神奈川県','千葉県','埼玉県','茨城県','栃木県','群馬県'] },
+  { value: 'chubu', label: '中部', prefectures: ['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県'] },
+  { value: 'kinki', label: '近畿', prefectures: ['大阪府','京都府','兵庫県','奈良県','三重県','滋賀県','和歌山県'] },
+  { value: 'chugoku_shikoku', label: '中国・四国', prefectures: ['鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県'] },
+  { value: 'kyushu_okinawa', label: '九州・沖縄', prefectures: ['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'] },
+] as const;
+
+export const ALL_PREFECTURES = REGIONS.flatMap(r => r.prefectures);
+
 /** AI要約の最大文字数 */
 export const AI_SUMMARY_MAX_LENGTH = 40;
 

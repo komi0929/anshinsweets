@@ -2,19 +2,12 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { MANDATORY_ALLERGENS, RECOMMENDED_ALLERGENS, ALL_ALLERGENS } from '@/lib/allergens';
+import { MANDATORY_ALLERGENS, RECOMMENDED_ALLERGENS, ALL_ALLERGENS, ALLERGEN_EMOJI } from '@/lib/allergens';
 import { APP_NAME, AI_SUMMARY_MAX_LENGTH } from '@/lib/constants';
 
-const ALLERGEN_EMOJI: Record<string, string> = {
-  egg: '🥚', milk: '🥛', wheat: '🌾', buckwheat: '🍜', peanut: '🥜',
-  shrimp: '🦐', crab: '🦀', walnut: '🌰', almond: '🌰', abalone: '🐚',
-  squid: '🦑', salmon_roe: '🟠', orange: '🍊', cashew: '🥜', kiwi: '🥝',
-  beef: '🥩', sesame: '⚪', salmon: '🐟', mackerel: '🐟', soybean: '🫘',
-  chicken: '🍗', banana: '🍌', pork: '🥓', matsutake: '🍄', peach: '🍑',
-  yam: '🍠', apple: '🍎', gelatin: '🫧',
-};
 
-type AllergenState = Record<string, boolean>; // code -> is_free
+type AllergenLevel = 'none' | 'contains' | 'line';
+type AllergenState = Record<string, AllergenLevel>;
 
 export default function NewProductPage() {
   const [productUrl, setProductUrl] = useState('');
@@ -53,14 +46,16 @@ export default function NewProductPage() {
   };
 
   const toggleAllergen = (code: string) => {
-    setAllergenStates(prev => ({
-      ...prev,
-      [code]: !prev[code],
-    }));
+    setAllergenStates(prev => {
+      const current = prev[code] || 'none';
+      const next: AllergenLevel = current === 'none' ? 'contains' : current === 'contains' ? 'line' : 'none';
+      return { ...prev, [code]: next };
+    });
   };
 
-  const freeCount = Object.values(allergenStates).filter(v => v).length;
-  const canPublish = productName && productUrl && consent && freeCount > 0;
+  const containsCount = Object.values(allergenStates).filter(v => v === 'contains').length;
+  const lineCount = Object.values(allergenStates).filter(v => v === 'line').length;
+  const canPublish = productName && productUrl && consent;
 
   const handleSave = async () => {
     if (!canPublish) return;
@@ -257,28 +252,29 @@ export default function NewProductPage() {
               ⚠️ 重要: アレルギー情報のAI自動判定は行いません
             </p>
             <p style={{ color: 'var(--color-text-secondary)' }}>
-              以下の各品目について、この商品に「含まれていない（不使用）」品目にチェックを入れてください。
-              チェックした品目は「不使用」としてユーザーに表示されます。
+              以下の各品目について、この商品の状態を設定してください。
+              タップするたびに「含まない → 含む → 同一ライン製造」と切り替わります。
               <strong>誤った情報は生命に関わります。正確にチェックしてください。</strong>
             </p>
           </div>
 
           {/* Mandatory 8 */}
           <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 'var(--space-md)', color: 'var(--color-danger)' }}>
-            🔴 特定原材料 8品目（表示義務）
+            🔴 特定原材料 8品目（表示義務）― 含まれるものにチェック
           </h3>
           <div className="allergen-grid" style={{ marginBottom: 'var(--space-xl)' }}>
             {MANDATORY_ALLERGENS.map(allergen => (
               <button
                 key={allergen.code}
-                className={`allergen-chip ${allergenStates[allergen.code] ? 'selected' : ''}`}
+                className={`allergen-chip ${(allergenStates[allergen.code] || 'none') === 'contains' ? 'selected' : (allergenStates[allergen.code] || 'none') === 'line' ? 'selected' : ''}`}
+                style={(allergenStates[allergen.code] || 'none') === 'line' ? { borderColor: '#F59E0B', background: '#FFFBEB' } : undefined}
                 onClick={() => toggleAllergen(allergen.code)}
                 id={`allergen-set-${allergen.code}`}
               >
                 <span className="allergen-chip-icon">{ALLERGEN_EMOJI[allergen.code]}</span>
                 <span>{allergen.name}</span>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>
-                  {allergenStates[allergen.code] ? '✓ 不使用' : '未設定'}
+                  {(allergenStates[allergen.code] || 'none') === 'contains' ? '⚠️ 含む' : (allergenStates[allergen.code] || 'none') === 'line' ? '🏭 同一ライン' : '含まない'}
                 </span>
               </button>
             ))}
@@ -286,38 +282,43 @@ export default function NewProductPage() {
 
           {/* Recommended 20 */}
           <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 'var(--space-md)', color: 'var(--color-warning)' }}>
-            🟡 特定原材料に準ずるもの 20品目（表示推奨）
+            🟡 特定原材料に準ずるもの 20品目（表示推奨）― 含まれるものにチェック
           </h3>
           <div className="allergen-grid" style={{ marginBottom: 'var(--space-lg)' }}>
             {RECOMMENDED_ALLERGENS.map(allergen => (
               <button
                 key={allergen.code}
-                className={`allergen-chip ${allergenStates[allergen.code] ? 'selected' : ''}`}
+                className={`allergen-chip ${(allergenStates[allergen.code] || 'none') === 'contains' ? 'selected' : (allergenStates[allergen.code] || 'none') === 'line' ? 'selected' : ''}`}
+                style={(allergenStates[allergen.code] || 'none') === 'line' ? { borderColor: '#F59E0B', background: '#FFFBEB' } : undefined}
                 onClick={() => toggleAllergen(allergen.code)}
                 id={`allergen-set-${allergen.code}`}
               >
                 <span className="allergen-chip-icon">{ALLERGEN_EMOJI[allergen.code]}</span>
                 <span>{allergen.name}</span>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>
-                  {allergenStates[allergen.code] ? '✓ 不使用' : '未設定'}
+                  {(allergenStates[allergen.code] || 'none') === 'contains' ? '⚠️ 含む' : (allergenStates[allergen.code] || 'none') === 'line' ? '🏭 同一ライン' : '含まない'}
                 </span>
               </button>
             ))}
           </div>
 
-          {freeCount > 0 && (
+          {(containsCount > 0 || lineCount > 0) && (
             <div style={{
-              background: 'var(--color-safe-bg)',
+              background: 'var(--color-warning-bg)',
               borderRadius: 'var(--radius-md)',
               padding: 'var(--space-md)',
               marginBottom: 'var(--space-md)',
             }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-safe)', fontWeight: 600 }}>
-                ✅ {freeCount}品目を「不使用」に設定中:
-              </p>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: 4 }}>
-                {ALL_ALLERGENS.filter(a => allergenStates[a.code]).map(a => a.name).join('、')}
-              </p>
+              {containsCount > 0 && (
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-danger)', fontWeight: 600, marginBottom: lineCount > 0 ? 6 : 0 }}>
+                  ⚠️ {containsCount}品目を「含む」: {ALL_ALLERGENS.filter(a => allergenStates[a.code] === 'contains').map(a => a.name).join('、')}
+                </p>
+              )}
+              {lineCount > 0 && (
+                <p style={{ fontSize: '0.85rem', color: '#D97706', fontWeight: 600 }}>
+                  🏭 {lineCount}品目を「同一ライン製造」: {ALL_ALLERGENS.filter(a => allergenStates[a.code] === 'line').map(a => a.name).join('、')}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -357,7 +358,7 @@ export default function NewProductPage() {
           </button>
           {!canPublish && (
             <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-sm)' }}>
-              商品名、URL、アレルゲン設定（1品目以上）、法的同意が必要です
+              商品名、URL、法的同意が必要です
             </p>
           )}
         </div>

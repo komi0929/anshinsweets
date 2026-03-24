@@ -4,18 +4,10 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getProductById } from '@/lib/supabase';
-import { ALL_ALLERGENS } from '@/lib/allergens';
-import { FRESHNESS_WARNING_DAYS, APP_NAME } from '@/lib/constants';
+import { ALL_ALLERGENS, ALLERGEN_EMOJI } from '@/lib/allergens';
+import { FRESHNESS_WARNING_DAYS } from '@/lib/constants';
 import type { Product } from '@/lib/types';
 
-const ALLERGEN_EMOJI: Record<string, string> = {
-  egg: '🥚', milk: '🥛', wheat: '🌾', buckwheat: '🍜', peanut: '🥜',
-  shrimp: '🦐', crab: '🦀', walnut: '🌰', almond: '🌰', abalone: '🐚',
-  squid: '🦑', salmon_roe: '🟠', orange: '🍊', cashew: '🥜', kiwi: '🥝',
-  beef: '🥩', sesame: '⚪', salmon: '🐟', mackerel: '🐟', soybean: '🫘',
-  chicken: '🍗', banana: '🍌', pork: '🥓', matsutake: '🍄', peach: '🍑',
-  yam: '🍠', apple: '🍎', gelatin: '🫧',
-};
 
 function daysSince(dateStr: string): number {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -66,7 +58,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const freeAllergens = product.allergens?.filter(a => a.is_free) || [];
+  const containedAllergens = product.allergens || [];
   const days = daysSince(product.last_confirmed_at);
   const isStale = days > FRESHNESS_WARNING_DAYS;
   const confirmedDate = new Date(product.last_confirmed_at).toLocaleDateString('ja-JP');
@@ -91,24 +83,38 @@ export default function ProductDetailPage() {
         {/* Header */}
         <div className="teaser-header animate-fadeIn">
           <h1 className="teaser-product-name">{product.product_name}</h1>
-          <p className="teaser-store-name">🏪 {product.store?.store_name}</p>
+        </div>
+
+        {/* Store Link */}
+        <div className="animate-fadeIn stagger-1" style={{ marginBottom: 'var(--space-sm)' }}>
+          <Link href={`/shop/${product.store_id}`} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: '0.85rem', color: 'var(--color-primary)',
+            textDecoration: 'underline', textUnderlineOffset: 3,
+          }}>
+            🧁 {product.store?.store_name} のページを見る →
+          </Link>
         </div>
 
         {/* Allergen Tags */}
-        <div className="teaser-allergens animate-fadeIn stagger-1">
-          {freeAllergens.map(a => {
-            const info = ALL_ALLERGENS.find(al => al.code === a.allergen_code);
-            return (
-              <span key={a.allergen_code} className="badge badge-safe">
-                {ALLERGEN_EMOJI[a.allergen_code] || '✓'} {info?.name}不使用
-              </span>
-            );
-          })}
+        <div className="teaser-allergens animate-fadeIn stagger-2">
+          {containedAllergens.length > 0 ? (
+            containedAllergens.map(a => {
+              const info = ALL_ALLERGENS.find(al => al.code === a.allergen_code);
+              return (
+                <span key={a.allergen_code} className="badge badge-warning">
+                  ⚠️ {info?.name}含む
+                </span>
+              );
+            })
+          ) : (
+            <span className="badge badge-safe">✅ アレルゲンフリー</span>
+          )}
         </div>
 
         {/* AI Summary */}
         {product.ai_summary && (
-          <p className="teaser-summary animate-fadeIn stagger-2">
+          <p className="teaser-summary animate-fadeIn stagger-3">
             {product.ai_summary}
           </p>
         )}
@@ -122,18 +128,24 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        {/* CTA Button */}
-        <div className="teaser-cta animate-fadeInUp stagger-4">
-          <a
-            href={product.product_url}
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* Dual CTA Buttons */}
+        <div className="teaser-cta animate-fadeInUp stagger-4" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          <button
             className="btn btn-cta btn-full"
-            id="cta-buy"
+            id="cta-buy-online"
+            onClick={() => alert('🚧 この機能はデモ版では利用できません。\n本番環境では商品の購入ページに遷移します。')}
           >
-            🛒 詳細な成分表・購入はこちら →
-          </a>
-          <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-sm)' }}>
+            🛒 ネットで購入する →
+          </button>
+          <Link
+            href={`/shop/${product.store_id}`}
+            className="btn btn-secondary btn-full"
+            id="cta-visit-store"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 600, fontSize: '1rem', padding: 'var(--space-md)' }}
+          >
+            📍 お店に行く
+          </Link>
+          <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)' }}>
             ※ 最終的なアレルギー成分の確認は、必ず遷移先のEC・店舗で行ってください
           </p>
         </div>

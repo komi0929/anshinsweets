@@ -79,17 +79,18 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     if (error) throw error;
 
-    // Update allergens if provided
+    // Update allergens if provided (only insert allergens that are contained)
     if (allergens && typeof allergens === 'object') {
       // Delete old allergens
       await supabase.from('product_allergens').delete().eq('product_id', id);
 
-      // Insert new ones
-      const allergenRecords = Object.entries(allergens).map(([code, isFree]) => ({
-        product_id: id,
-        allergen_code: code,
-        is_free: Boolean(isFree),
-      }));
+      // Insert new ones (only where value is true = contained)
+      const allergenRecords = Object.entries(allergens)
+        .filter(([, contains]) => Boolean(contains))
+        .map(([code]) => ({
+          product_id: id,
+          allergen_code: code,
+        }));
 
       if (allergenRecords.length > 0) {
         await supabase.from('product_allergens').insert(allergenRecords);

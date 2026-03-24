@@ -14,6 +14,7 @@ export default function AboutPage() {
           </Link>
           <div className="navbar-links">
             <Link href="/" className="navbar-link">ホーム</Link>
+            <Link href="/shops" className="navbar-link">🧁 お店を探す</Link>
             <Link href="/profile" className="navbar-link">プロフィール</Link>
           </div>
         </div>
@@ -61,8 +62,8 @@ export default function AboutPage() {
             </p>
             <p style={{ marginBottom: 'var(--space-md)' }}>
               {APP_NAME}は、そんな親御さんの負担を少しでも軽くしたいという思いから生まれました。
-              特定原材料等28品目に完全対応し、アレルギーのある食材を除外するだけで、
-              安心して食べられるスイーツが簡単に見つかります。
+              特定原材料等28品目に完全対応し、お子さまのアレルギーに該当する食材を選ぶだけで、
+              それを含まない安心して食べられるスイーツが簡単に見つかります。
             </p>
             <p>
               すべての子どもが、笑顔でスイーツを楽しめる社会を目指して。
@@ -77,8 +78,8 @@ export default function AboutPage() {
             {[
               { icon: '🛡️', title: '安全性の徹底', desc: 'アレルギー情報はすべて店舗が手動で登録・確認。AIによる自動判定は一切行いません。命に関わる情報だからこそ、人の目で確認しています。' },
               { icon: '🔍', title: '28品目完全対応', desc: '食品表示法に基づく特定原材料8品目＋準ずるもの20品目すべてに対応。お子さまのアレルギーに合わせた精密な検索が可能です。' },
-              { icon: '📱', title: 'シンプルな使いやすさ', desc: 'プロフィールに除外品目を設定するだけ。次回からはワンタップで安心なスイーツが見つかります。' },
-              { icon: '🏪', title: '店舗との信頼関係', desc: '掲載店舗はすべてアレルギー表示に法的責任を持つことに同意しています。安心してお買い物いただけます。' },
+              { icon: '📱', title: 'シンプルな使いやすさ', desc: 'お子さまのアレルギーを選ぶだけ。それを含む商品は自動で除外され、安全なスイーツだけが表示されます。お店のミニページでメニュー確認→MAP表示までワンストップ。' },
+              { icon: '🧁', title: '店舗との信頼関係', desc: '掲載店舗はすべてアレルギー表示に法的責任を持つことに同意しています。安心してお買い物いただけます。' },
             ].map((feature, i) => (
               <div key={i} style={{
                 display: 'flex',

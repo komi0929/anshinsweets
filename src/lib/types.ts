@@ -17,6 +17,11 @@ export type Store = {
   is_verified: boolean;
   created_at: string;
   updated_at: string;
+  // Rich metadata (optional, displayed on mini-page)
+  features?: string[];
+  business_hours?: string;
+  price_range?: string;
+  prefecture?: string;
 };
 
 /** 商品 */
@@ -36,12 +41,11 @@ export type Product = {
   allergens?: ProductAllergen[];
 };
 
-/** 商品アレルゲン情報 */
+/** 商品アレルゲン情報（レコードが存在 = そのアレルゲンを含む） */
 export type ProductAllergen = {
   id: string;
   product_id: string;
   allergen_code: string;
-  is_free: boolean;
 };
 
 /** 通知リクエスト */
@@ -63,7 +67,7 @@ export type ECClick = {
 
 /** 検索フィルタ状態 */
 export type SearchFilter = {
-  excludedAllergens: string[];
+  myAllergens: string[];
   category?: string;
   area?: string;
   sortBy?: 'newest' | 'distance';
@@ -72,7 +76,7 @@ export type SearchFilter = {
 /** アレルゲンプロフィール（localStorage保存） */
 export type AllergenProfile = {
   childName?: string;
-  excludedAllergens: string[];
+  myAllergens: string[];
   updatedAt: string;
 };
 

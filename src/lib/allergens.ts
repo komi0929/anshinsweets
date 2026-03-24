@@ -57,3 +57,35 @@ export function getAllergenByCode(code: string): Allergen | undefined {
 
 /** アレルゲンコードの配列（バリデーション用） */
 export const ALLERGEN_CODES = ALL_ALLERGENS.map(a => a.code);
+
+/** アレルゲン絵文字マップ（全28品目ユニーク） */
+export const ALLERGEN_EMOJI: Record<string, string> = {
+  egg: '🥚',
+  milk: '🥛',
+  wheat: '🌾',
+  buckwheat: '🍜',
+  peanut: '🥜',
+  shrimp: '🦐',
+  crab: '🦀',
+  walnut: '🌰',
+  almond: '🔶',
+  abalone: '🐚',
+  squid: '🦑',
+  salmon_roe: '🟠',
+  orange: '🍊',
+  cashew: '🫘',
+  kiwi: '🥝',
+  beef: '🥩',
+  sesame: '⚪',
+  salmon: '🐟',
+  mackerel: '🐠',
+  soybean: '🫛',
+  chicken: '🍗',
+  banana: '🍌',
+  pork: '🥓',
+  matsutake: '🍄',
+  peach: '🍑',
+  yam: '🍠',
+  apple: '🍎',
+  gelatin: '🫧',
+};
