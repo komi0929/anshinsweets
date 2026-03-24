@@ -66,6 +66,7 @@ export default function FavoritesPage() {
           <div className="navbar-links">
             <Link href="/" className="navbar-link">🍰 商品を探す</Link>
             <Link href="/profile" className="navbar-link">プロフィール</Link>
+            <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
       </nav>

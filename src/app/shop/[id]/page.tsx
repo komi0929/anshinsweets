@@ -128,6 +128,7 @@ export default function ShopPage() {
           <div className="navbar-links">
             <Link href="/shops" className="navbar-link">🧁 お店一覧</Link>
             <Link href="/" className="navbar-link">🍰 商品を探す</Link>
+            <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
       </nav>

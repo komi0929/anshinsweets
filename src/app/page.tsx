@@ -150,6 +150,7 @@ export default function HomePage() {
             <Link href="/favorites" className="navbar-link" id="nav-favorites">💾 安心リスト</Link>
             <Link href="/request" className="navbar-link" id="nav-alerts">🔔 通知</Link>
             <Link href="/profile" className="navbar-link" id="nav-profile">プロフィール</Link>
+            <Link href="/feedback" className="navbar-link" id="nav-feedback">💬 ご意見</Link>
             <Link href="/about" className="navbar-link" id="nav-about">About</Link>
             <Link href="/store" className="btn btn-sm btn-outline" id="nav-store">店舗の方へ</Link>
           </div>

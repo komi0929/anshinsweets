@@ -16,6 +16,7 @@ export default function AboutPage() {
             <Link href="/" className="navbar-link">ホーム</Link>
             <Link href="/shops" className="navbar-link">🧁 お店を探す</Link>
             <Link href="/profile" className="navbar-link">プロフィール</Link>
+            <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
       </nav>

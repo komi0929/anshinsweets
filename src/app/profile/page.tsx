@@ -150,6 +150,7 @@ export default function ProfilePage() {
           <div className="navbar-links">
             <Link href="/" className="navbar-link">ホーム</Link>
             <Link href="/favorites" className="navbar-link">💾 安心リスト</Link>
+            <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
       </nav>

@@ -12,6 +12,7 @@ export default function DisclaimerPage() {
           </Link>
           <div className="navbar-links">
             <Link href="/" className="navbar-link">ホーム</Link>
+            <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
       </nav>
