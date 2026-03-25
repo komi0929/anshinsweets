@@ -358,99 +358,165 @@ export default function FeedbackPage() {
           ))}
         </div>
 
-        {/* Feedback List */}
-        {loading ? (
-          <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
-            {[1, 2, 3].map(i => (
-              <div key={i} className="skeleton" style={{ height: 120, borderRadius: 'var(--radius-md)' }} />
-            ))}
-          </div>
-        ) : feedbacks.length === 0 ? (
-          <div className="empty-state animate-fadeInUp" style={{ minHeight: 200 }}>
-            <div className="empty-state-icon">📝</div>
-            <h3 className="empty-state-title">まだ投稿がありません</h3>
-            <p className="empty-state-desc">最初の意見を投稿してみましょう！</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
-            {feedbacks.map((fb, i) => {
-              const cat = CATEGORY_INFO[fb.category];
-              const isLiked = likedIds.includes(fb.id);
-              return (
-                <div
-                  key={fb.id}
-                  className={`card animate-fadeInUp stagger-${Math.min(i % 5 + 1, 5)}`}
-                  style={{ padding: 'var(--space-lg)', position: 'relative' }}
-                >
-                  {/* Category Badge + Time */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      background: `${cat.color}15`, color: cat.color,
-                      padding: '3px 10px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 700,
-                    }}>
-                      {cat.emoji} {cat.label}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                      {getTimeAgo(fb.created_at)}
+        {/* Survey Results Graph */}
+        {(() => {
+          const SURVEY_PREFIX = '【サービス必要度アンケート】';
+          const surveyFeedbacks = feedbacks.filter(fb => fb.message.startsWith(SURVEY_PREFIX));
+          const regularFeedbacks = feedbacks.filter(fb => !fb.message.startsWith(SURVEY_PREFIX));
+
+          const surveyResults = [
+            { label: '必要', color: '#22C55E', emoji: '💯' },
+            { label: 'どちらかというと必要', color: '#3B82F6', emoji: '👍' },
+            { label: 'どちらかというと不要', color: '#F59E0B', emoji: '🤔' },
+            { label: '不要', color: '#EF4444', emoji: '✋' },
+          ].map(item => ({
+            ...item,
+            count: surveyFeedbacks.filter(fb => fb.message.includes(item.label)).length,
+          }));
+          const totalSurvey = surveyFeedbacks.length;
+
+          return (
+            <>
+              {/* Survey Summary */}
+              {totalSurvey > 0 && (
+                <div className="card animate-fadeIn" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      📊 サービス必要度アンケート
+                    </h2>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                      回答数: {totalSurvey}
                     </span>
                   </div>
-
-                  {/* Nickname */}
-                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 4, fontWeight: 600 }}>
-                    {fb.nickname || '匿名ユーザー'}
-                  </p>
-
-                  {/* Message */}
-                  <p style={{ fontSize: '0.9rem', lineHeight: 1.7, color: 'var(--color-text)', marginBottom: 'var(--space-md)', whiteSpace: 'pre-wrap' }}>
-                    {fb.message}
-                  </p>
-
-                  {/* Like Button */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                    <button
-                      onClick={() => handleLike(fb)}
-                      disabled={isLiked}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '6px 14px', borderRadius: 20,
-                        border: isLiked ? '2px solid #EF4444' : '2px solid var(--color-border)',
-                        background: isLiked ? '#FEF2F2' : 'white',
-                        color: isLiked ? '#EF4444' : 'var(--color-text-secondary)',
-                        fontWeight: 700, fontSize: '0.85rem', cursor: isLiked ? 'default' : 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {isLiked ? '❤️' : '🤍'} {fb.likes}
-                    </button>
-                  </div>
-
-                  {/* Admin Replies */}
-                  {fb.replies && fb.replies.length > 0 && (
-                    <div style={{ marginTop: 'var(--space-md)', borderTop: '1px solid var(--color-border-light)', paddingTop: 'var(--space-md)' }}>
-                      {fb.replies.map(reply => (
-                        <div key={reply.id} style={{
-                          background: reply.is_admin ? '#F0FDF4' : 'var(--color-bg-secondary)',
-                          borderRadius: 'var(--radius-md)',
-                          padding: 'var(--space-sm) var(--space-md)',
-                          marginBottom: 'var(--space-sm)',
-                          borderLeft: reply.is_admin ? '3px solid var(--color-safe)' : 'none',
-                        }}>
-                          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: reply.is_admin ? 'var(--color-safe)' : 'var(--color-text-muted)', marginBottom: 4 }}>
-                            {reply.is_admin ? '🛡️ 運営チーム' : 'ユーザー'} · {getTimeAgo(reply.created_at)}
-                          </p>
-                          <p style={{ fontSize: '0.85rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                            {reply.message}
-                          </p>
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    {surveyResults.map(item => {
+                      const pct = totalSurvey > 0 ? Math.round((item.count / totalSurvey) * 100) : 0;
+                      return (
+                        <div key={item.label}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              {item.emoji} {item.label}
+                            </span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: item.color }}>
+                              {item.count}票 ({pct}%)
+                            </span>
+                          </div>
+                          <div style={{
+                            height: 24, borderRadius: 12,
+                            background: 'var(--color-bg-secondary)',
+                            overflow: 'hidden',
+                          }}>
+                            <div style={{
+                              height: '100%', borderRadius: 12,
+                              background: `linear-gradient(90deg, ${item.color}, ${item.color}CC)`,
+                              width: `${pct}%`,
+                              transition: 'width 0.8s ease-out',
+                              minWidth: item.count > 0 ? 8 : 0,
+                            }} />
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              )}
+
+              {/* Regular Feedback List */}
+              {loading ? (
+                <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="skeleton" style={{ height: 120, borderRadius: 'var(--radius-md)' }} />
+                  ))}
+                </div>
+              ) : regularFeedbacks.length === 0 ? (
+                <div className="empty-state animate-fadeInUp" style={{ minHeight: 200 }}>
+                  <div className="empty-state-icon">📝</div>
+                  <h3 className="empty-state-title">まだ投稿がありません</h3>
+                  <p className="empty-state-desc">最初の意見を投稿してみましょう！</p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+                  {regularFeedbacks.map((fb, i) => {
+                    const cat = CATEGORY_INFO[fb.category];
+                    const isLiked = likedIds.includes(fb.id);
+                    return (
+                      <div
+                        key={fb.id}
+                        className={`card animate-fadeInUp stagger-${Math.min(i % 5 + 1, 5)}`}
+                        style={{ padding: 'var(--space-lg)', position: 'relative' }}
+                      >
+                        {/* Category Badge + Time */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            background: `${cat.color}15`, color: cat.color,
+                            padding: '3px 10px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 700,
+                          }}>
+                            {cat.emoji} {cat.label}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                            {getTimeAgo(fb.created_at)}
+                          </span>
+                        </div>
+
+                        {/* Nickname */}
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 4, fontWeight: 600 }}>
+                          {fb.nickname || '匿名ユーザー'}
+                        </p>
+
+                        {/* Message */}
+                        <p style={{ fontSize: '0.9rem', lineHeight: 1.7, color: 'var(--color-text)', marginBottom: 'var(--space-md)', whiteSpace: 'pre-wrap' }}>
+                          {fb.message}
+                        </p>
+
+                        {/* Like Button */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                          <button
+                            onClick={() => handleLike(fb)}
+                            disabled={isLiked}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '6px 14px', borderRadius: 20,
+                              border: isLiked ? '2px solid #EF4444' : '2px solid var(--color-border)',
+                              background: isLiked ? '#FEF2F2' : 'white',
+                              color: isLiked ? '#EF4444' : 'var(--color-text-secondary)',
+                              fontWeight: 700, fontSize: '0.85rem', cursor: isLiked ? 'default' : 'pointer',
+                              transition: 'all 0.2s ease',
+                            }}
+                          >
+                            {isLiked ? '❤️' : '🤍'} {fb.likes}
+                          </button>
+                        </div>
+
+                        {/* Admin Replies */}
+                        {fb.replies && fb.replies.length > 0 && (
+                          <div style={{ marginTop: 'var(--space-md)', borderTop: '1px solid var(--color-border-light)', paddingTop: 'var(--space-md)' }}>
+                            {fb.replies.map(reply => (
+                              <div key={reply.id} style={{
+                                background: reply.is_admin ? '#F0FDF4' : 'var(--color-bg-secondary)',
+                                borderRadius: 'var(--radius-md)',
+                                padding: 'var(--space-sm) var(--space-md)',
+                                marginBottom: 'var(--space-sm)',
+                                borderLeft: reply.is_admin ? '3px solid var(--color-safe)' : 'none',
+                              }}>
+                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: reply.is_admin ? 'var(--color-safe)' : 'var(--color-text-muted)', marginBottom: 4 }}>
+                                  {reply.is_admin ? '🛡️ 運営チーム' : 'ユーザー'} · {getTimeAgo(reply.created_at)}
+                                </p>
+                                <p style={{ fontSize: '0.85rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                  {reply.message}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </main>
     </>
   );
