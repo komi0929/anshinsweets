@@ -14,6 +14,7 @@ export type Store = {
   phone: string | null;
   website_url: string | null;
   logo_url: string | null;
+  cover_image_url: string | null;
   is_verified: boolean;
   created_at: string;
   updated_at: string;

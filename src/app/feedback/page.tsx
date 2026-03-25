@@ -13,6 +13,14 @@ import {
 import { APP_NAME } from '@/lib/constants';
 
 const LIKED_KEY = 'anshin_feedback_liked';
+const SURVEY_KEY = 'anshin_service_survey_done';
+
+const SURVEY_OPTIONS = [
+  { value: 'needed', label: '必要', emoji: '💯', color: '#22C55E' },
+  { value: 'somewhat_needed', label: 'どちらかというと必要', emoji: '👍', color: '#3B82F6' },
+  { value: 'somewhat_unnecessary', label: 'どちらかというと不要', emoji: '🤔', color: '#F59E0B' },
+  { value: 'unnecessary', label: '不要', emoji: '✋', color: '#EF4444' },
+] as const;
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -26,7 +34,126 @@ function getTimeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('ja-JP');
 }
 
+/** Service necessity survey gate */
+function ServiceSurvey({ onComplete }: { onComplete: () => void }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!selected) return;
+    setSubmitting(true);
+    // Save survey response to Supabase as feedback
+    const label = SURVEY_OPTIONS.find(o => o.value === selected)?.label || selected;
+    await createFeedback(
+      'other' as FeedbackCategory,
+      `【サービス必要度アンケート】${label}`,
+      ''
+    );
+    localStorage.setItem(SURVEY_KEY, selected);
+    setSubmitting(false);
+    onComplete();
+  };
+
+  return (
+    <>
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <Link href="/" className="navbar-logo">
+            <span className="navbar-logo-emoji">🍰</span>
+            <span>{APP_NAME}</span>
+          </Link>
+        </div>
+      </nav>
+
+      <main style={{
+        maxWidth: 480, margin: '0 auto',
+        padding: 'var(--space-xl) var(--space-md)',
+        minHeight: '80vh',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      }}>
+        <div className="animate-fadeIn" style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: 'var(--space-md)' }}>📊</div>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: 'var(--space-sm)', lineHeight: 1.4 }}>
+            このサービスは<br />必要だと思いますか？
+          </h1>
+          <p style={{
+            fontSize: '0.85rem', color: 'var(--color-text-secondary)',
+            lineHeight: 1.6,
+          }}>
+            あんしんスイーツの改善に活かすため<br />率直なご意見をお聞かせください
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+          {SURVEY_OPTIONS.map((option, i) => (
+            <button
+              key={option.value}
+              className={`card animate-fadeInUp stagger-${i + 1}`}
+              onClick={() => setSelected(option.value)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 'var(--space-md)',
+                padding: 'var(--space-lg)',
+                border: selected === option.value
+                  ? `3px solid ${option.color}`
+                  : '3px solid transparent',
+                background: selected === option.value
+                  ? `${option.color}08`
+                  : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{
+                fontSize: '1.8rem',
+                width: 48, height: 48,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: '50%',
+                background: selected === option.value ? `${option.color}15` : 'var(--color-bg-secondary)',
+                flexShrink: 0,
+                transition: 'all 0.2s ease',
+              }}>
+                {option.emoji}
+              </span>
+              <span style={{
+                fontSize: '1.05rem', fontWeight: 700,
+                color: selected === option.value ? option.color : 'var(--color-text)',
+                transition: 'color 0.2s ease',
+              }}>
+                {option.label}
+              </span>
+              {selected === option.value && (
+                <span style={{
+                  marginLeft: 'auto', color: option.color,
+                  fontSize: '1.2rem', fontWeight: 700,
+                }}>✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className="btn btn-primary btn-full animate-fadeInUp stagger-5"
+          onClick={handleSubmit}
+          disabled={!selected || submitting}
+          style={{
+            marginTop: 'var(--space-xl)',
+            fontSize: '1rem', padding: '14px',
+            opacity: selected ? 1 : 0.5,
+          }}
+        >
+          {submitting ? '送信中...' : '回答してご意見ページへ進む →'}
+        </button>
+      </main>
+    </>
+  );
+}
+
 export default function FeedbackPage() {
+  const [surveyDone, setSurveyDone] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return !!localStorage.getItem(SURVEY_KEY);
+  });
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FeedbackCategory | 'all'>('all');
@@ -51,6 +178,7 @@ export default function FeedbackPage() {
   };
 
   useEffect(() => {
+    if (!surveyDone) return;
     let ignore = false;
     (async () => {
       const data = await getFeedbacks(activeTab === 'all' ? undefined : activeTab);
@@ -60,7 +188,7 @@ export default function FeedbackPage() {
       }
     })();
     return () => { ignore = true; };
-  }, [activeTab]);
+  }, [activeTab, surveyDone]);
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
@@ -87,6 +215,11 @@ export default function FeedbackPage() {
       setFeedbacks(prev => prev.map(f => f.id === fb.id ? { ...f, likes: f.likes + 1 } : f));
     }
   };
+
+  // Show survey gate for first-time visitors
+  if (!surveyDone) {
+    return <ServiceSurvey onComplete={() => setSurveyDone(true)} />;
+  }
 
   const tabs: { key: FeedbackCategory | 'all'; label: string; emoji: string }[] = [
     { key: 'all', label: 'すべて', emoji: '📋' },

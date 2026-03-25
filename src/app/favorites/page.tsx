@@ -74,7 +74,7 @@ export default function FavoritesPage() {
       <main className="container" style={{ padding: 'var(--space-xl) var(--space-md)', maxWidth: 800, margin: '0 auto' }}>
         <div className="animate-fadeIn" style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
           <h1 style={{ fontSize: '1.5rem', marginBottom: 'var(--space-sm)' }}>
-            💾 安心リスト
+            📖 安心リスト
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
             お子さまが安心して食べられるスイーツを保存しています
@@ -97,7 +97,7 @@ export default function FavoritesPage() {
           </div>
         ) : favorites.length === 0 ? (
           <div className="empty-state animate-fadeInUp" style={{ minHeight: 300 }}>
-            <div className="empty-state-icon">💾</div>
+            <div className="empty-state-icon">📖</div>
             <h3 className="empty-state-title">まだ保存していません</h3>
             <p className="empty-state-desc">
               商品カードの ♡ ボタンを押すと、ここに保存されます。

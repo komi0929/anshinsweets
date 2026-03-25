@@ -80,15 +80,22 @@ export function extractToken(authHeader: string | null): string | null {
   return authHeader.slice(7);
 }
 
-/** Simple password hashing (for demo; use bcrypt in production) */
+/** Password hashing with bcrypt (production-grade) */
 export async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + JWT_SECRET);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const bcrypt = await import('bcryptjs');
+  return bcrypt.hash(password, 12);
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const computed = await hashPassword(password);
+  const bcrypt = await import('bcryptjs');
+  // Try bcrypt first (new format)
+  if (hash.startsWith('$2a$') || hash.startsWith('$2b$')) {
+    return bcrypt.compare(password, hash);
+  }
+  // Fallback: legacy SHA-256 hash (for migration period)
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + JWT_SECRET);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const computed = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
   return computed === hash;
 }

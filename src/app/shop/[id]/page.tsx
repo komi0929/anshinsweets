@@ -135,30 +135,60 @@ export default function ShopPage() {
 
       <main style={{ maxWidth: 800, margin: '0 auto', padding: 'var(--space-lg) var(--space-md) var(--space-3xl)' }}>
 
+        {/* ===== Cover Image Hero ===== */}
+        {store.cover_image_url && (
+          <div className="animate-fadeIn" style={{
+            width: '100%', height: 220, borderRadius: 'var(--radius-xl)',
+            background: `url(${store.cover_image_url}) center/cover no-repeat`,
+            position: 'relative', overflow: 'hidden',
+            marginBottom: -40,
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.5))',
+            }} />
+          </div>
+        )}
+
         {/* ===== Store Header ===== */}
         <section className="animate-fadeIn" style={{
-          background: 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 50%, #ECFDF5 100%)',
+          background: store.cover_image_url
+            ? 'white'
+            : 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 50%, #ECFDF5 100%)',
           borderRadius: 'var(--radius-xl)',
           padding: 'var(--space-xl) var(--space-lg)',
           marginBottom: 'var(--space-xl)',
           position: 'relative',
           overflow: 'hidden',
+          boxShadow: store.cover_image_url ? 'var(--shadow-lg)' : 'none',
         }}>
-          <div style={{
-            position: 'absolute', top: -20, right: -20, fontSize: '6rem', opacity: 0.1,
-            transform: 'rotate(15deg)',
-          }}>🧁</div>
+          {!store.cover_image_url && (
+            <div style={{
+              position: 'absolute', top: -20, right: -20, fontSize: '6rem', opacity: 0.1,
+              transform: 'rotate(15deg)',
+            }}>🧁</div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.8rem', flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(234, 88, 12, 0.3)',
-            }}>
-              🍰
-            </div>
+            {store.logo_url ? (
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: `url(${store.logo_url}) center/cover no-repeat`,
+                flexShrink: 0,
+                border: '3px solid white',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              }} />
+            ) : (
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.8rem', flexShrink: 0,
+                boxShadow: '0 4px 12px rgba(234, 88, 12, 0.3)',
+              }}>
+                🍰
+              </div>
+            )}
             <div>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2 }}>
                 {store.store_name}

@@ -271,7 +271,7 @@ export default function EditProductPage() {
               background: allergenConsent ? 'var(--primary)' : '#D1D5DB', color: 'white',
               opacity: saving ? 0.7 : 1,
             }}>
-            {saving ? '保存中...' : '💾 変更を保存'}
+            {saving ? '保存中...' : '✅ 変更を保存'}
           </button>
 
           <button onClick={handleDelete}

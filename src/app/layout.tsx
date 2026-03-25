@@ -3,6 +3,7 @@ import ClientLayout from "@/components/ClientLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://anshinsweets.com'),
   title: "あんしんスイーツ | アレルギー対応スイーツ検索ポータル",
   description: "アレルギーを持つ子どもの親を救う、アレルギー対応スイーツ特化ポータル。特定原材料等28品目に対応した安心・安全なスイーツが見つかります。",
   keywords: "アレルギー対応, スイーツ, 卵不使用, 乳不使用, 小麦不使用, グルテンフリー, 食物アレルギー",
@@ -18,9 +19,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "あんしんスイーツ | アレルギー対応スイーツ検索ポータル",
     description: "特定原材料等28品目に対応。お子さまのアレルギーに合わせて、安心して食べられるスイーツが見つかります。",
+    url: 'https://anshinsweets.com',
     type: "website",
     locale: "ja_JP",
     siteName: "あんしんスイーツ",
+    images: [{
+      url: '/icons/icon-512.png',
+      width: 512,
+      height: 512,
+      alt: 'あんしんスイーツ',
+    }],
   },
   twitter: {
     card: "summary_large_image",

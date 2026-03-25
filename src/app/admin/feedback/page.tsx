@@ -10,11 +10,7 @@ import {
   type FeedbackCategory,
 } from '@/lib/feedback';
 
-const ADMIN_PASSWORD = 'anshin2024';
-
 export default function AdminFeedbackPage() {
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState('');
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FeedbackCategory | 'all'>('all');
@@ -30,7 +26,6 @@ export default function AdminFeedbackPage() {
   }, [activeTab]);
 
   useEffect(() => {
-    if (!authed) return;
     let ignore = false;
     (async () => {
       const data = await getFeedbacks(activeTab === 'all' ? undefined : activeTab);
@@ -40,15 +35,7 @@ export default function AdminFeedbackPage() {
       }
     })();
     return () => { ignore = true; };
-  }, [authed, activeTab]);
-
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthed(true);
-    } else {
-      alert('パスワードが違います');
-    }
-  };
+  }, [activeTab]);
 
   const handleReply = async (feedbackId: string) => {
     if (!replyMessage.trim()) return;
@@ -63,36 +50,6 @@ export default function AdminFeedbackPage() {
     }
     setSending(false);
   };
-
-  if (!authed) {
-    return (
-      <div style={{
-        minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #FFF7ED, #FEF3C7)',
-      }}>
-        <div className="card" style={{ padding: 'var(--space-xl)', maxWidth: 400, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--space-md)' }}>🔒</div>
-          <h1 style={{ fontSize: '1.3rem', marginBottom: 'var(--space-lg)' }}>管理画面ログイン</h1>
-          <div className="input-group" style={{ marginBottom: 'var(--space-md)' }}>
-            <input
-              className="input-field"
-              type="password"
-              placeholder="パスワード"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-            />
-          </div>
-          <button className="btn btn-primary btn-full" onClick={handleLogin}>
-            ログイン
-          </button>
-          <Link href="/" style={{ display: 'block', marginTop: 'var(--space-md)', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-            ← トップへ戻る
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const tabs: { key: FeedbackCategory | 'all'; label: string; emoji: string; count: number }[] = [
     { key: 'all', label: 'すべて', emoji: '📋', count: feedbacks.length },
@@ -119,12 +76,6 @@ export default function AdminFeedbackPage() {
           <Link href="/feedback" style={{ color: '#94A3B8', fontSize: '0.85rem' }}>
             公開ページを見る →
           </Link>
-          <button
-            onClick={() => setAuthed(false)}
-            style={{ background: 'transparent', border: '1px solid #475569', color: '#94A3B8', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }}
-          >
-            ログアウト
-          </button>
         </div>
       </nav>
 

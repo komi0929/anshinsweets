@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyToken, extractToken } from '@/lib/auth';
+import { isValidUrl } from '@/lib/validation';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -59,6 +60,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const body = await request.json();
     const { product_name, product_url, ai_summary, image_url, category, is_published, allergens, allergen_consent } = body;
+
+    if (product_url && !isValidUrl(product_url)) {
+      return NextResponse.json({ error: 'URLの形式が正しくありません（http/httpsのみ）' }, { status: 400 });
+    }
 
     // Update product
     const { data: product, error } = await supabase

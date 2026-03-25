@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { createToken, hashPassword } from '@/lib/auth';
+import { isValidEmail } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +22,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: 'メールアドレスの形式が正しくありません' },
+        { status: 400 }
+      );
+    }
+
     if (!supabase) {
       return NextResponse.json(
         { error: 'データベース未接続' },
@@ -36,14 +44,18 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existing) {
+      // Prevent email enumeration: do not reveal that address is already registered
       return NextResponse.json(
-        { error: 'このメールアドレスは既に登録されています' },
-        { status: 409 }
+        { error: '登録処理を受け付けました。メールをご確認ください。' },
+        { status: 200 }
       );
     }
 
     // Hash password and create store
     const passwordHash = await hashPassword(password);
+
+    // TODO: Generate email verification token when email service is ready
+    // const verificationToken = crypto.randomUUID();
 
     const { data: store, error } = await supabase
       .from('stores')
@@ -51,10 +63,18 @@ export async function POST(request: NextRequest) {
         email,
         store_name,
         password_hash: passwordHash,
-        is_verified: true, // Auto-verify for now
+        is_verified: false, // Require email verification
+        // verification_token: verificationToken, // TODO: Add column to DB
       })
       .select()
       .single();
+
+    // TODO: In production, send verification email here:
+    // await sendVerificationEmail(email, verificationToken);
+    // For now, auto-verify for demo purposes:
+    if (store) {
+      await supabase.from('stores').update({ is_verified: true }).eq('id', store.id);
+    }
 
     if (error) {
       console.error('[Register] Supabase error:', error);

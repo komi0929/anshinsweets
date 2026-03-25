@@ -180,31 +180,64 @@ export default function ShopsPage() {
               {selectedPrefecture && <span>（{selectedPrefecture}）</span>}
             </p>
 
-            <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+            <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
               {stores.map((store, i) => (
                 <Link
                   key={store.id}
                   href={`/shop/${store.id}`}
                   className={`card animate-fadeInUp stagger-${Math.min(i + 1, 5)}`}
                   style={{
-                    display: 'flex', gap: 'var(--space-lg)', padding: 'var(--space-lg)',
+                    display: 'block', padding: 0,
                     textDecoration: 'none', color: 'inherit',
                     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    overflow: 'hidden', borderRadius: 'var(--radius-xl)',
                   }}
                 >
-                  {/* Store Avatar */}
+                  {/* Cover Image */}
                   <div style={{
-                    width: 72, height: 72, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--color-primary-50), var(--color-primary))',
+                    width: '100%', height: 180, position: 'relative',
+                    background: store.cover_image_url
+                      ? `url(${store.cover_image_url}) center/cover no-repeat`
+                      : 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 50%, #ECFDF5 100%)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, fontSize: '2rem',
-                    boxShadow: '0 4px 12px rgba(234, 88, 12, 0.2)',
                   }}>
-                    🍰
+                    {!store.cover_image_url && (
+                      <span style={{ fontSize: '4rem', opacity: 0.3 }}>🧁</span>
+                    )}
+                    {/* Gradient overlay for text readability */}
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0,
+                      height: 60,
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.4))',
+                    }} />
+                    {/* Store logo overlay */}
+                    {store.logo_url && (
+                      <div style={{
+                        position: 'absolute', bottom: -28, left: 20,
+                        width: 56, height: 56, borderRadius: '50%',
+                        border: '3px solid white',
+                        background: `url(${store.logo_url}) center/cover no-repeat`,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        zIndex: 2,
+                      }} />
+                    )}
+                    {!store.logo_url && (
+                      <div style={{
+                        position: 'absolute', bottom: -28, left: 20,
+                        width: 56, height: 56, borderRadius: '50%',
+                        border: '3px solid white',
+                        background: 'linear-gradient(135deg, var(--color-primary-50), var(--color-primary))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        zIndex: 2,
+                      }}>
+                        🍰
+                      </div>
+                    )}
                   </div>
 
                   {/* Store Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ padding: 'var(--space-lg)', paddingTop: 'calc(var(--space-lg) + 12px)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 4, flexWrap: 'wrap' }}>
                       <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{store.store_name}</h2>
                       {store.is_verified && (
@@ -238,17 +271,15 @@ export default function ShopsPage() {
                       </p>
                     )}
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                      {store.address && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          📍 {store.address}
-                        </span>
-                      )}
-                    </div>
+                    {store.address && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        📍 {store.address}
+                      </div>
+                    )}
 
                     {/* Feature badges */}
                     {store.features && store.features.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 'var(--space-sm)' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 'var(--space-sm)' }}>
                         {store.features.slice(0, 3).map(f => (
                           <span key={f} style={{
                             fontSize: '0.65rem', padding: '2px 8px',
@@ -266,7 +297,6 @@ export default function ShopsPage() {
                     )}
 
                     <div style={{
-                      marginTop: 'var(--space-sm)',
                       fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 600,
                     }}>
                       メニュー・地図を見る →

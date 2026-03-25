@@ -149,7 +149,7 @@ export default function ProfilePage() {
           </Link>
           <div className="navbar-links">
             <Link href="/" className="navbar-link">ホーム</Link>
-            <Link href="/favorites" className="navbar-link">💾 安心リスト</Link>
+            <Link href="/favorites" className="navbar-link">📖 安心リスト</Link>
             <Link href="/feedback" className="navbar-link">💬 ご意見</Link>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function ProfilePage() {
 
             {/* Save */}
             <button className="btn btn-primary btn-full btn-lg" onClick={handleSave} id="save-profile">
-              💾 プロフィールを保存
+              📖 プロフィールを保存
             </button>
           </>
         )}

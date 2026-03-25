@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyToken, extractToken } from '@/lib/auth';
+import { isValidUrl } from '@/lib/validation';
 
 // GET /api/products - Public: Get all published products
 export async function GET(request: NextRequest) {
@@ -65,6 +66,10 @@ export async function POST(request: NextRequest) {
 
     if (!product_name || !product_url) {
       return NextResponse.json({ error: '商品名とURLは必須です' }, { status: 400 });
+    }
+
+    if (!isValidUrl(product_url)) {
+      return NextResponse.json({ error: 'URLの形式が正しくありません（http/httpsのみ）' }, { status: 400 });
     }
 
     if (!allergen_consent) {
