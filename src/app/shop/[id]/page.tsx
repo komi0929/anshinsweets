@@ -395,14 +395,27 @@ export default function ShopPage() {
                   }}>
                     {/* Product Header */}
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
-                      <div style={{
-                        width: 72, height: 72, borderRadius: 'var(--radius-md)',
-                        background: 'linear-gradient(135deg, var(--color-primary-50), var(--color-bg-secondary))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, fontSize: '2rem',
-                      }}>
-                        🍰
-                      </div>
+                      {product.image_url ? (
+                        <div style={{
+                          width: 90, height: 90, borderRadius: 'var(--radius-md)',
+                          overflow: 'hidden', flexShrink: 0,
+                        }}>
+                          <img
+                            src={product.image_url}
+                            alt={product.product_name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: 90, height: 90, borderRadius: 'var(--radius-md)',
+                          background: 'linear-gradient(135deg, var(--color-primary-50), var(--color-bg-secondary))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, fontSize: '2.5rem',
+                        }}>
+                          🍰
+                        </div>
+                      )}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 4 }}>
                           {product.product_name}
