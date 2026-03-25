@@ -1,8 +1,6 @@
-const CACHE_NAME = 'anshinsweets-v1';
+const CACHE_NAME = 'anshinsweets-v2';
 const STATIC_ASSETS = [
   '/',
-  '/about',
-  '/profile',
   '/manifest.json',
 ];
 
@@ -30,29 +28,39 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: Network-first for API, Cache-first for static
+// Fetch: Network-first with cache fallback
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Skip non-GET requests (POST, PUT, DELETE etc.)
   if (request.method !== 'GET') return;
 
-  // API calls: network only (fresh data is critical for allergen safety)
+  // Skip API calls - fresh data is critical
+  const url = new URL(request.url);
   if (url.pathname.startsWith('/api/')) return;
 
-  // Static assets: stale-while-revalidate
+  // Skip cross-origin requests
+  if (url.origin !== self.location.origin) return;
+
+  // Network-first strategy: try network, fall back to cache
   event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(request);
-      const networkFetch = fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
+        // Only cache valid responses
         if (response.ok) {
-          cache.put(request, response.clone());
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, clone);
+          });
         }
         return response;
-      }).catch(() => cached);
-
-      return cached || networkFetch;
-    })
+      })
+      .catch(async () => {
+        // Network failed - try cache
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        // No cache either - return a basic offline response
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      })
   );
 });
